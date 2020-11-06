@@ -1,3 +1,5 @@
+#include "MemoryStream.cpp"
+
 #include "stdafx.h"
 
 #include "Networks.h"

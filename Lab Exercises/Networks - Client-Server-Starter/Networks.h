@@ -185,6 +185,8 @@ inline float fractionalPart(float number)
 // FRAMEWORK HEADERS
 ////////////////////////////////////////////////////////////////////////
 
+#include "MemoryStream.h"
+#include "Messages.h"
 #include "Module.h"
 #include "ModuleNetworking.h"
 #include "ModuleNetworkingClient.h"
