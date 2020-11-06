@@ -114,9 +114,10 @@ bool ModuleNetworking::preUpdate()
 			
 			else
 			{
-				int data = recv(s, (char*)incomingDataBuffer, incomingDataBufferSize, 0);
+				InputMemoryStream packet;
+				int bytesRead = recv(s, packet.GetBufferPtr(), packet.GetSize(), 0);
 
-				if (data == 0 || data == ECONNRESET || data == SOCKET_ERROR)
+				if (bytesRead == 0 || bytesRead == ECONNRESET || bytesRead == SOCKET_ERROR)
 				{
 					onSocketDisconnected(s);
 					disconnectedSockets.push_back(s);
@@ -124,7 +125,8 @@ bool ModuleNetworking::preUpdate()
 
 				else
 				{
-					onSocketReceivedData(s, incomingDataBuffer);
+					packet.SetSize((uint32)bytesRead);
+					onSocketReceivedData(s, packet);
 				}
 			}
 		}
@@ -143,6 +145,17 @@ bool ModuleNetworking::preUpdate()
 	{
 		sockets.erase(std::find(sockets.begin(), sockets.end(), disc));
 	}
+}
+
+bool ModuleNetworking::sendPacket(const OutputMemoryStream& packet, SOCKET socket)
+{
+	int result = send(socket, packet.GetBufferPtr(), packet.GetSize(), 0);
+	if (result == SOCKET_ERROR)
+	{
+		reportError("send");
+		return false;
+	}
+	return true; 
 }
 
 bool ModuleNetworking::cleanUp()
