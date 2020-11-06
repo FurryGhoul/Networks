@@ -1,3 +1,4 @@
+#include "ModuleNetworking.h"
 #include "ModuleNetworkingClient.h"
 
 

@@ -1,9 +1,7 @@
-#include "MemoryStream.cpp"
-
 #include "stdafx.h"
 
 #include "Networks.h"
-
+#include "MemoryStream.cpp"
 #include "ModuleNetworking.cpp"
 #include "ModuleNetworkingClient.cpp"
 #include "ModuleNetworkingServer.cpp"

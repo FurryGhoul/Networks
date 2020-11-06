@@ -145,6 +145,8 @@ bool ModuleNetworking::preUpdate()
 	{
 		sockets.erase(std::find(sockets.begin(), sockets.end(), disc));
 	}
+
+	return true;
 }
 
 bool ModuleNetworking::sendPacket(const OutputMemoryStream& packet, SOCKET socket)
