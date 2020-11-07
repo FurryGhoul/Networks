@@ -115,18 +115,18 @@ bool ModuleNetworking::preUpdate()
 			else
 			{
 				InputMemoryStream packet;
-				int bytesRead = recv(s, packet.GetBufferPtr(), packet.GetSize(), 0);
+				int bytesRead = recv(s, packet.GetBufferPtr(), packet.GetCapacity(), 0);
 
-				if (bytesRead == 0 || bytesRead == ECONNRESET || bytesRead == SOCKET_ERROR)
+				if (bytesRead > 0 && bytesRead != ECONNRESET)
 				{
-					onSocketDisconnected(s);
-					disconnectedSockets.push_back(s);
+					packet.SetSize((uint32)bytesRead);
+					onSocketReceivedData(s, packet);
 				}
 
 				else
 				{
-					packet.SetSize((uint32)bytesRead);
-					onSocketReceivedData(s, packet);
+					onSocketDisconnected(s);
+					disconnectedSockets.push_back(s);
 				}
 			}
 		}

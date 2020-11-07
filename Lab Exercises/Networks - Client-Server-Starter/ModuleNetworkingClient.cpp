@@ -58,14 +58,39 @@ bool ModuleNetworkingClient::gui()
 {
 	if (state != ClientState::Stopped)
 	{
-		// NOTE(jesus): You can put ImGui code here for debugging purposes
 		ImGui::Begin("Client Window");
 
 		Texture *tex = App->modResources->client;
 		ImVec2 texSize(400.0f, 400.0f * tex->height / tex->width);
 		ImGui::Image(tex->shaderResource, texSize);
 
-		ImGui::Text("%s connected to the server...", playerName.c_str());
+		ImGui::BeginChild("Chat", ImVec2(400, 750), true);
+
+		for (int i = 0; i < ChatMessages.size(); i++)
+		{
+			ImGui::Text(ChatMessages[i].c_str());
+		}
+
+		
+		ImGui::EndChild();
+
+		char newMessage[50] = "";
+
+		ImGuiInputTextFlags flags = ImGuiInputTextFlags_EnterReturnsTrue;
+		if (ImGui::InputText("Chat Message", newMessage, sizeof(newMessage), flags))
+		{
+			std::string message = newMessage;
+			if (message.find_first_of("/") != 0)
+			{
+				OutputMemoryStream packet;
+				packet << ClientMessage::Message;
+				packet << playerName;
+				packet << message;
+
+				ChatMessages.push_back(playerName + ": " + message);
+				sendPacket(packet, clientSocket);
+			}
+		}
 
 		ImGui::End();
 	}
@@ -75,7 +100,23 @@ bool ModuleNetworkingClient::gui()
 
 void ModuleNetworkingClient::onSocketReceivedData(SOCKET socket, const InputMemoryStream& packet)
 {
-	state = ClientState::Stopped;
+	ServerMessage serverMessage;
+	packet >> serverMessage;
+
+	if (serverMessage == ServerMessage::Welcome)
+	{
+		std::string message;
+		packet >> message;
+
+		ChatMessages.push_back(message);
+	}
+
+	else if (serverMessage == ServerMessage::RelayedMessage)
+	{
+		std::string message;
+		packet >> message;
+		ChatMessages.push_back(message);
+	}
 }
 
 void ModuleNetworkingClient::onSocketDisconnected(SOCKET socket)

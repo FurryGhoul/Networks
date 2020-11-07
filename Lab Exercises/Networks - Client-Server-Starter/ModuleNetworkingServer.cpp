@@ -123,6 +123,34 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET socket, const InputMemo
 			if (connectedSocket.socket == socket)
 			{
 				connectedSocket.playerName = playerName;
+
+				std::string welcomeMessage = "Welcome, " + playerName + "!";
+
+				OutputMemoryStream welcomeStream;
+				welcomeStream << ServerMessage::Welcome;
+				welcomeStream << welcomeMessage;
+				sendPacket(welcomeStream, socket);
+			}
+		}
+	}
+
+	if (clientMessage == ClientMessage::Message)
+	{
+		std::string message;
+		std::string senderName;
+		packet >> senderName;
+		packet >> message;
+
+		for (auto& connectedSocket : connectedSockets)
+		{
+			if (connectedSocket.socket != socket)
+			{
+				std::string newChatMessage = senderName + ": " + message;
+				OutputMemoryStream relayPacket;
+				relayPacket << ServerMessage::RelayedMessage;
+				relayPacket << newChatMessage;
+
+				sendPacket(relayPacket, connectedSocket.socket);
 			}
 		}
 	}

@@ -55,5 +55,7 @@ private:
 	SOCKET clientSocket;
 
 	std::string playerName;
+
+	std::vector<std::string> ChatMessages;
 };
 
