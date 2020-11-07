@@ -115,6 +115,7 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET socket, const InputMemo
 
 	if (clientMessage == ClientMessage::Hello)
 	{
+		//If the received message is a client saying hello, welcome them and get their username
 		std::string playerName;
 		packet >> playerName;
 
@@ -124,18 +125,30 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET socket, const InputMemo
 			{
 				connectedSocket.playerName = playerName;
 
-				std::string welcomeMessage = "Welcome, " + playerName + "!";
+				std::string welcomeMessage = "Welcome, " + playerName + "!\nType /help to see a list of available commands.";
 
 				OutputMemoryStream welcomeStream;
 				welcomeStream << ServerMessage::Welcome;
 				welcomeStream << welcomeMessage;
 				sendPacket(welcomeStream, socket);
 			}
+
+			//Also notify all other users that a new user has joined, and give them his/her username
+			else if (connectedSocket.socket != socket)
+			{
+				std::string joinedMessage = playerName + " has joined!";
+
+				OutputMemoryStream joinedStream;
+				joinedStream << ServerMessage::Joined;
+				joinedStream << joinedMessage;
+				sendPacket(joinedStream, connectedSocket.socket);
+			}
 		}
 	}
 
-	if (clientMessage == ClientMessage::Message)
+	else if (clientMessage == ClientMessage::Message)
 	{
+		//If the received message is a text from a client, add the sender's name and relay it to every other client
 		std::string message;
 		std::string senderName;
 		packet >> senderName;
@@ -151,6 +164,96 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET socket, const InputMemo
 				relayPacket << newChatMessage;
 
 				sendPacket(relayPacket, connectedSocket.socket);
+			}
+		}
+	}
+
+	else if (clientMessage == ClientMessage::List)
+	{
+		//If the received message is asking for a list, add all usernames to a string and send it back to that client
+		std::string playerList = "Current users in the chat:";
+		for (auto& connectedSocket : connectedSockets)
+		{
+			if (connectedSocket.socket != socket)
+				playerList += "\n" + connectedSocket.playerName;
+
+			else
+				playerList += "\n" + connectedSocket.playerName + " (that's you!)";
+		}
+
+		OutputMemoryStream listPacket;
+		listPacket << ServerMessage::List;
+		listPacket << playerList;
+
+		sendPacket(listPacket, socket);
+	}
+
+	else if (clientMessage == ClientMessage::Kick)
+	{
+		std::string userToKick;
+		packet >> userToKick;
+
+		for (auto& connectedSocket : connectedSockets)
+		{
+			if (connectedSocket.playerName == userToKick)
+			{
+				//TODO: Kick user (disconnect socket)
+			}
+		}
+	}
+
+	else if (clientMessage == ClientMessage::Whisper)
+	{
+		std::string userToWhisper;
+		std::string messageToWhisper;
+		std::string senderName;
+		packet >> userToWhisper;
+		packet >> messageToWhisper;
+		packet >> senderName;
+
+		for (auto& connectedSocket : connectedSockets)
+		{
+			if (connectedSocket.playerName == userToWhisper)
+			{
+				std::string whisperedMessage = senderName + " whispers: " + messageToWhisper;
+				OutputMemoryStream whisperPacket;
+				whisperPacket << ServerMessage::RelayedWhisper;
+				whisperPacket << whisperedMessage;
+
+				sendPacket(whisperPacket, connectedSocket.socket);
+			}
+		}
+	}
+
+	else if (clientMessage == ClientMessage::ChangeName)
+	{
+		std::string newName;
+		std::string senderName;
+		packet >> newName;
+		packet >> senderName;
+
+		for (auto& connectedSocket : connectedSockets)
+		{
+			if (connectedSocket.socket == socket)
+			{
+				connectedSocket.playerName = newName;
+
+				std::string changeNameMessage = "You've changed your name from " + senderName + " to " + newName + ".";
+				OutputMemoryStream changeNamePacket;
+				changeNamePacket << ServerMessage::ChangeName;
+				changeNamePacket << changeNameMessage;
+
+				sendPacket(changeNamePacket, socket);
+			}
+
+			else if (connectedSocket.socket != socket)
+			{
+				std::string changeNameMessage = senderName + " has changed their name to " + newName + ".";
+				OutputMemoryStream changeNamePacket;
+				changeNamePacket << ServerMessage::ChangeName;
+				changeNamePacket << changeNameMessage;
+
+				sendPacket(changeNamePacket, connectedSocket.socket);
 			}
 		}
 	}

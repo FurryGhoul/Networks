@@ -6,12 +6,27 @@
 enum class ClientMessage
 {
 	Hello,
-	Message
+	Message,
+	List,
+	Kick,
+	Whisper,
+	ChangeName,
+	Mute,
+	KK,
+	Lol
 };
 
 enum class ServerMessage
 {
 	Welcome,
-	RelayedMessage
+	Joined,
+	RelayedMessage,
+	List,
+	Kick,
+	RelayedWhisper,
+	ChangeName,
+	Mute,
+	KK,
+	Lol
 };
 

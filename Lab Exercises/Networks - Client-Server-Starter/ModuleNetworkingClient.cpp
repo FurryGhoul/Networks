@@ -36,6 +36,7 @@ bool ModuleNetworkingClient::update()
 {
 	if (state == ClientState::Start)
 	{
+		//Send a Hello message to the server just upon joining
 		OutputMemoryStream packet;
 		packet << ClientMessage::Hello;
 		packet << playerName;
@@ -66,6 +67,7 @@ bool ModuleNetworkingClient::gui()
 
 		ImGui::BeginChild("Chat", ImVec2(400, 750), true);
 
+		//Print all chat messages
 		for (int i = 0; i < ChatMessages.size(); i++)
 		{
 			ImGui::Text(ChatMessages[i].c_str());
@@ -79,6 +81,7 @@ bool ModuleNetworkingClient::gui()
 		ImGuiInputTextFlags flags = ImGuiInputTextFlags_EnterReturnsTrue;
 		if (ImGui::InputText("Chat Message", newMessage, sizeof(newMessage), flags))
 		{
+			//If the inputted text doesn't have a / in pos 0, send it as a Message
 			std::string message = newMessage;
 			if (message.find_first_of("/") != 0)
 			{
@@ -87,8 +90,83 @@ bool ModuleNetworkingClient::gui()
 				packet << playerName;
 				packet << message;
 
+				//Add the sent text to the local chat log and then send it to the server to relay to other clients
 				ChatMessages.push_back(playerName + ": " + message);
 				sendPacket(packet, clientSocket);
+			}
+
+			//If the text has a / in pos 0, check which command it is
+			else if (message.find("/") == 0)
+			{
+				if (message.find("/help") == 0)
+				{
+					std::string commandList = "Available commands:\n'/list': Displays all connected users.\n'/kick username': Kicks a specific user from the chat.\n'/whisper username msg': Sends a message to a specific user.\n'/change_name newname': Changes your username to a new one.\n'/clear': Deletes all messages on the chat window, but just for you.";
+					ChatMessages.push_back(commandList);
+				}
+
+				else if (message.find("/list") == 0)
+				{
+					OutputMemoryStream packet;
+					packet << ClientMessage::List;
+
+					sendPacket(packet, clientSocket);
+				}
+
+				else if (message.find("/kick") == 0)
+				{
+					//Remove the first 6 characters of the message and send that to the server
+					message.erase(0, 5);
+					std::string userToKick = message;
+					OutputMemoryStream packet;
+					packet << ClientMessage::Kick;
+					packet << userToKick;
+
+					sendPacket(packet, clientSocket);
+				}
+
+				else if (message.find("/whisper") == 0)
+				{
+					size_t pos1 = message.find_first_of(" ");
+					size_t pos2 = message.find(" ", pos1 + 1);
+					std::string userToWhisper = message.substr(pos1+1, pos2-pos1-1);
+					std::string messageToWhisper = message.substr(pos2+1);
+
+					OutputMemoryStream packet;
+					packet << ClientMessage::Whisper;
+					packet << userToWhisper;
+					packet << messageToWhisper;
+					packet << playerName;
+
+					ChatMessages.push_back(playerName + " (whispered to " + userToWhisper + "): " + messageToWhisper);
+
+					sendPacket(packet, clientSocket);
+				}
+
+				else if (message.find("/change_name") == 0)
+				{
+					size_t pos1 = message.find_first_of(" ");
+					size_t pos2 = message.find(" ", pos1 + 1);
+
+					std::string newName = message.substr(pos1 + 1, pos2 - pos1 - 1); //Ignore all text after the second space
+
+					OutputMemoryStream packet;
+					packet << ClientMessage::ChangeName;
+					packet << newName;
+					packet << playerName;
+
+					playerName = newName;
+					sendPacket(packet, clientSocket);
+				}
+
+				else if (message.find("/clear") == 0)
+				{
+					ChatMessages.clear();
+				}
+
+				else if (message.find("/kk") == 0)
+				{
+
+				}
 			}
 		}
 
@@ -103,6 +181,7 @@ void ModuleNetworkingClient::onSocketReceivedData(SOCKET socket, const InputMemo
 	ServerMessage serverMessage;
 	packet >> serverMessage;
 
+	// Server Welcome messages are added to the chat log as a regular message, but it's separated for potential future use
 	if (serverMessage == ServerMessage::Welcome)
 	{
 		std::string message;
@@ -115,6 +194,39 @@ void ModuleNetworkingClient::onSocketReceivedData(SOCKET socket, const InputMemo
 	{
 		std::string message;
 		packet >> message;
+
+		ChatMessages.push_back(message);
+	}
+
+	else if (serverMessage == ServerMessage::List)
+	{
+		std::string message;
+		packet >> message;
+
+		ChatMessages.push_back(message);
+	}
+
+	else if (serverMessage == ServerMessage::Joined)
+	{
+		std::string message;
+		packet >> message;
+
+		ChatMessages.push_back(message);
+	}
+
+	else if (serverMessage == ServerMessage::RelayedWhisper)
+	{
+		std::string message;
+		packet >> message;
+
+		ChatMessages.push_back(message);
+	}
+
+	else if (serverMessage == ServerMessage::ChangeName)
+	{
+		std::string message;
+		packet >> message;
+
 		ChatMessages.push_back(message);
 	}
 }
