@@ -1,3 +1,4 @@
+#include <Windows.h>
 #include "Networks.h"
 #include "ScreenMainMenu.h"
 
@@ -54,6 +55,10 @@ void ScreenMainMenu::gui()
 		App->modScreen->screenGame->playerName = playerNameStr;
 		App->modScreen->swapScreensWithTransition(this, App->modScreen->screenGame);
 	}
+
+	ImGui::Spacing();
+	ImGui::Separator();
+	ImGui::Spacing();
 
 	ImGui::End();
 }

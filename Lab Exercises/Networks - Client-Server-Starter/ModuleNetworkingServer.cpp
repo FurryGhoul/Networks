@@ -156,16 +156,36 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET socket, const InputMemo
 
 		for (auto& connectedSocket : connectedSockets)
 		{
-			if (connectedSocket.socket != socket)
+			if (connectedSocket.socket == socket) //Find sending socket
 			{
-				std::string newChatMessage = senderName + ": " + message;
-				OutputMemoryStream relayPacket;
-				relayPacket << ServerMessage::RelayedMessage;
-				relayPacket << newChatMessage;
+				if (connectedSocket.muted) //Respond to them if they're muted
+				{
+					std::string youreMutedMessage = "You're muted! No one will see that.";
+					OutputMemoryStream relayPacket;
+					relayPacket << ServerMessage::RelayedMessage;
+					relayPacket << youreMutedMessage;
+					sendPacket(relayPacket, socket);
+				}
 
-				sendPacket(relayPacket, connectedSocket.socket);
+				else if (!connectedSocket.muted) //If they aren't, relay the message to everyone
+				{
+					for (auto& connectedSocket : connectedSockets)
+					{
+						if (connectedSocket.socket != socket)
+						{
+							std::string newChatMessage = senderName + ": " + message;
+							OutputMemoryStream relayPacket;
+							relayPacket << ServerMessage::RelayedMessage;
+							relayPacket << newChatMessage;
+
+							sendPacket(relayPacket, connectedSocket.socket);
+						}
+					}
+				}
+
 			}
 		}
+		
 	}
 
 	else if (clientMessage == ClientMessage::List)
@@ -254,6 +274,51 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET socket, const InputMemo
 				changeNamePacket << changeNameMessage;
 
 				sendPacket(changeNamePacket, connectedSocket.socket);
+			}
+		}
+	}
+
+	else if (clientMessage == ClientMessage::KK)
+	{
+		std::string kkName;
+		packet >> kkName;
+
+		kkName += " activates their bubblegum!";
+
+		for (auto& connectedSocket : connectedSockets)
+		{
+			OutputMemoryStream KKPacket;
+			KKPacket << ServerMessage::KK;
+			KKPacket << kkName;
+
+			sendPacket(KKPacket, connectedSocket.socket);
+		}
+	}
+
+	else if (clientMessage == ClientMessage::Mute)
+	{
+		std::string userToMute;
+		std::string senderName;
+		bool muted;
+		packet >> userToMute;
+		packet >> senderName;
+		packet >> muted;
+
+		for (auto& connectedSocket : connectedSockets)
+		{
+			if (connectedSocket.playerName == userToMute)
+			{
+				connectedSocket.muted = muted;
+				std::string mutedMessage;
+				if (muted)
+					mutedMessage = "You have been muted by " + senderName;
+				else if (!muted)
+					mutedMessage = "You have been unmuted by " + senderName;
+				OutputMemoryStream mutedPacket;
+				mutedPacket << ServerMessage::Mute;
+				mutedPacket << mutedMessage;
+
+				sendPacket(mutedPacket, connectedSocket.socket);
 			}
 		}
 	}

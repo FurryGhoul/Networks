@@ -1,3 +1,5 @@
+#include <Windows.h>
+#include <shellapi.h>
 #include "ModuleNetworking.h"
 #include "ModuleNetworkingClient.h"
 
@@ -65,7 +67,7 @@ bool ModuleNetworkingClient::gui()
 		ImVec2 texSize(400.0f, 400.0f * tex->height / tex->width);
 		ImGui::Image(tex->shaderResource, texSize);
 
-		ImGui::BeginChild("Chat", ImVec2(400, 750), true);
+		ImGui::BeginChild("Chat", ImVec2(400, 450), true);
 
 		//Print all chat messages
 		for (int i = 0; i < ChatMessages.size(); i++)
@@ -165,7 +167,43 @@ bool ModuleNetworkingClient::gui()
 
 				else if (message.find("/kk") == 0)
 				{
+					OutputMemoryStream packet;
+					packet << ClientMessage::KK;
+					packet << playerName;
 
+					sendPacket(packet, clientSocket);
+				}
+
+				else if (message.find("/mute") == 0)
+				{
+					size_t pos1 = message.find_first_of(" ");
+					size_t pos2 = message.find(" ", pos1 + 1);
+
+					std::string userToMute = message.substr(pos1 + 1, pos2 - pos1 - 1); //Ignore all text after the second space
+
+					OutputMemoryStream packet;
+					packet << ClientMessage::Mute;
+					packet << userToMute;
+					packet << playerName;
+					packet << true;
+
+					sendPacket(packet, clientSocket);
+				}
+
+				else if (message.find("/unmute") == 0)
+				{
+					size_t pos1 = message.find_first_of(" ");
+					size_t pos2 = message.find(" ", pos1 + 1);
+
+					std::string userToMute = message.substr(pos1 + 1, pos2 - pos1 - 1); //Ignore all text after the second space
+
+					OutputMemoryStream packet;
+					packet << ClientMessage::Mute;
+					packet << userToMute;
+					packet << playerName;
+					packet << false;
+
+					sendPacket(packet, clientSocket);
 				}
 			}
 		}
@@ -223,6 +261,24 @@ void ModuleNetworkingClient::onSocketReceivedData(SOCKET socket, const InputMemo
 	}
 
 	else if (serverMessage == ServerMessage::ChangeName)
+	{
+		std::string message;
+		packet >> message;
+
+		ChatMessages.push_back(message);
+	}
+
+	else if (serverMessage == ServerMessage::KK)
+	{
+		std::string message;
+		packet >> message;
+
+		ChatMessages.push_back(message);
+
+		ShellExecute(0, 0, "https://www.youtube.com/watch?v=022CdArz5oM", 0, 0, SW_SHOW);
+	}
+
+	else if (serverMessage == ServerMessage::Mute)
 	{
 		std::string message;
 		packet >> message;
