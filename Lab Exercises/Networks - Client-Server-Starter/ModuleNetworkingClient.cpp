@@ -68,7 +68,7 @@ bool ModuleNetworkingClient::gui()
 		ImVec2 texSize(400.0f, 400.0f * tex->height / tex->width);
 		ImGui::Image(tex->shaderResource, texSize);
 
-		ImGui::BeginChild("Chat", ImVec2(400, 450), true);
+		ImGui::BeginChild("Chat", ImVec2(600, 450), true);
 
 		//Print all chat messages
 		for (int i = 0; i < ChatMessages.size(); i++)
@@ -114,7 +114,7 @@ bool ModuleNetworkingClient::gui()
 			{
 				if (message.find("/help") == 0)
 				{
-					std::string commandList = "Available commands:\n'/list': Displays all connected users.\n'/kick username': Kicks a specific user from the chat.\n'/whisper username msg': Sends a message to a specific user.\n'/change_name newname': Changes your username to a new one.\n'/clear': Deletes all messages on the chat window, but just for you.";
+					std::string commandList = "Available commands:\n'/list': Displays all connected users.\n'/kick username': Kicks a specific user from the chat.\n'/whisper username msg': Sends a message to a specific user.\n'/change_name newname': Changes your username to a new one.\n'/clear': Deletes all messages on the chat window, but just for you.\n'/kk': Opens up the 'bubblegum kk' video on every user's browsers.\n'/mute user': Makes a user unable to speak.\n'/unmute': Makes a user able to speak again.\n'/roulette': Selects a random user from the currently connected ones.";
 					ChatMessages.push_back(commandList);
 				}
 
