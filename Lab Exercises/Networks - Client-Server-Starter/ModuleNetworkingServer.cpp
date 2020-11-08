@@ -333,6 +333,24 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET socket, const InputMemo
 			}
 		}
 	}
+
+	else if (clientMessage == ClientMessage::Roulette)
+	{
+		std::string senderName;
+		packet >> senderName;
+		//Set a random number from 0 to the max number of users and iterate up until that number
+		int selected = rand() % (connectedSockets.size());
+		std::string selectedUserMessage = senderName + " spun the roulette, and " + connectedSockets.at(selected).playerName + " won!";
+
+		for (auto& connectedSocket : connectedSockets)
+		{
+			OutputMemoryStream roulettePacket;
+			roulettePacket << ServerMessage::Roulette;
+			roulettePacket << selectedUserMessage;
+
+			sendPacket(roulettePacket, connectedSocket.socket);
+		}
+	}
 }
 
 void ModuleNetworkingServer::onSocketDisconnected(SOCKET socket)

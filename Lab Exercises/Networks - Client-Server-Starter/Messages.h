@@ -13,7 +13,7 @@ enum class ClientMessage
 	ChangeName,
 	Mute,
 	KK,
-	Lol
+	Roulette
 };
 
 enum class ServerMessage
@@ -27,6 +27,6 @@ enum class ServerMessage
 	ChangeName,
 	Mute,
 	KK,
-	Lol
+	Roulette
 };
 

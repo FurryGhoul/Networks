@@ -73,9 +73,9 @@ bool ModuleNetworkingClient::gui()
 		//Print all chat messages
 		for (int i = 0; i < ChatMessages.size(); i++)
 		{
-			ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(r, g, b, 1.0f));
+			//ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(r, g, b, 1.0f));
 			ImGui::Text(ChatMessages[i].c_str());
-			ImGui::PopStyleColor();
+			//ImGui::PopStyleColor();
 		}
 
 		
@@ -84,7 +84,7 @@ bool ModuleNetworkingClient::gui()
 		char newMessage[50] = "";
 
 		ImGuiInputTextFlags flags = ImGuiInputTextFlags_EnterReturnsTrue;
-		ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 1.0f, 0.0f, 1.0f));
+		//ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 1.0f, 0.0f, 1.0f));
 		if (ImGui::InputText("Chat Message", newMessage, sizeof(newMessage), flags))
 		{
 			r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
@@ -218,9 +218,18 @@ bool ModuleNetworkingClient::gui()
 
 					sendPacket(packet, clientSocket);
 				}
+
+				else if (message.find("/roulette") == 0)
+				{
+					OutputMemoryStream packet;
+					packet << ClientMessage::Roulette;
+					packet << playerName;
+
+					sendPacket(packet, clientSocket);
+				}
 			}
 		}
-		ImGui::PopStyleColor();
+		//ImGui::PopStyleColor();
 		ImGui::End();
 	}
 
@@ -302,6 +311,14 @@ void ModuleNetworkingClient::onSocketReceivedData(SOCKET socket, const InputMemo
 	else if (serverMessage == ServerMessage::Kick)
 	{
 		kickUser();
+	}
+
+	else if (serverMessage == ServerMessage::Roulette)
+	{
+		std::string message;
+		packet >> message;
+
+		ChatMessages.push_back(message);
 	}
 }
 
