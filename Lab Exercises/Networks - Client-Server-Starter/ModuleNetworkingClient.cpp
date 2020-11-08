@@ -116,12 +116,13 @@ bool ModuleNetworkingClient::gui()
 
 				else if (message.find("/kick") == 0)
 				{
-					//Remove the first 6 characters of the message and send that to the server
-					message.erase(0, 5);
-					std::string userToKick = message;
+					size_t pos1 = message.find_first_of(" ");
+					std::string kickMessage = message.substr(pos1 + 1);
+
+					//std::string userToKick = message;
 					OutputMemoryStream packet;
 					packet << ClientMessage::Kick;
-					packet << userToKick;
+					packet << kickMessage;
 
 					sendPacket(packet, clientSocket);
 				}
@@ -285,6 +286,11 @@ void ModuleNetworkingClient::onSocketReceivedData(SOCKET socket, const InputMemo
 
 		ChatMessages.push_back(message);
 	}
+
+	else if (serverMessage == ServerMessage::Kick)
+	{
+		kickUser();
+	}
 }
 
 void ModuleNetworkingClient::onSocketDisconnected(SOCKET socket)
@@ -292,3 +298,9 @@ void ModuleNetworkingClient::onSocketDisconnected(SOCKET socket)
 	state = ClientState::Stopped;
 }
 
+void ModuleNetworkingClient::kickUser()
+{
+	disconnect(); 
+	state = ClientState::Stopped;
+	ChatMessages.clear();
+}

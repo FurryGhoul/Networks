@@ -218,6 +218,17 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET socket, const InputMemo
 			if (connectedSocket.playerName == userToKick)
 			{
 				//TODO: Kick user (disconnect socket)
+				OutputMemoryStream kickPacket;
+				kickPacket << ServerMessage::Kick;
+				sendPacket(kickPacket, connectedSocket.socket);
+			}
+			else
+			{
+				std::string kickMessage = userToKick + " has been kicked ";
+				OutputMemoryStream kickPacket;
+				kickPacket << ServerMessage::RelayedMessage;
+				kickPacket << kickMessage;
+				sendPacket(kickPacket, connectedSocket.socket);
 			}
 		}
 	}

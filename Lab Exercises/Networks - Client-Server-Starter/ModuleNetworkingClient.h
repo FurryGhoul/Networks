@@ -26,7 +26,7 @@ private:
 
 	bool gui() override;
 
-
+	void kickUser();
 
 	//////////////////////////////////////////////////////////////////////
 	// ModuleNetworking virtual methods

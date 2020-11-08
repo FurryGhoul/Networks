@@ -79,6 +79,8 @@ bool ModuleNetworking::preUpdate()
 		reportError("select 4 read");
 	}
 
+	std::list<SOCKET> disconnectedSockets;
+
 	// TODO(jesus): for those sockets selected, check wheter or not they are
 	// a listen socket or a standard socket and perform the corresponding
 	// operation (accept() an incoming connection or recv() incoming data,
@@ -88,7 +90,6 @@ bool ModuleNetworking::preUpdate()
 	// connected socket to the managed list of sockets.
 	// On recv() success, communicate the incoming data received to the
 	// subclass (use the callback onSocketReceivedData()).
-	std::list<SOCKET> disconnectedSockets;
 
 	for (auto s : sockets)
 	{
