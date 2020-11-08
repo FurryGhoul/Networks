@@ -14,7 +14,9 @@ public:
 
 	bool isRunning() const;
 
-
+	float r;
+	float g;
+	float b;
 
 private:
 

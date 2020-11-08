@@ -1,4 +1,5 @@
 #include <Windows.h>
+#include <stdlib.h>
 #include <shellapi.h>
 #include "ModuleNetworking.h"
 #include "ModuleNetworkingClient.h"
@@ -72,7 +73,9 @@ bool ModuleNetworkingClient::gui()
 		//Print all chat messages
 		for (int i = 0; i < ChatMessages.size(); i++)
 		{
+			ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(r, g, b, 1.0f));
 			ImGui::Text(ChatMessages[i].c_str());
+			ImGui::PopStyleColor();
 		}
 
 		
@@ -81,8 +84,13 @@ bool ModuleNetworkingClient::gui()
 		char newMessage[50] = "";
 
 		ImGuiInputTextFlags flags = ImGuiInputTextFlags_EnterReturnsTrue;
+		ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 1.0f, 0.0f, 1.0f));
 		if (ImGui::InputText("Chat Message", newMessage, sizeof(newMessage), flags))
 		{
+			r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+			g = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+			b = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+
 			//If the inputted text doesn't have a / in pos 0, send it as a Message
 			std::string message = newMessage;
 			if (message.find_first_of("/") != 0)
@@ -91,6 +99,10 @@ bool ModuleNetworkingClient::gui()
 				packet << ClientMessage::Message;
 				packet << playerName;
 				packet << message;
+
+				packet << r;
+				packet << g;
+				packet << b;
 
 				//Add the sent text to the local chat log and then send it to the server to relay to other clients
 				ChatMessages.push_back(playerName + ": " + message);
@@ -208,7 +220,7 @@ bool ModuleNetworkingClient::gui()
 				}
 			}
 		}
-
+		ImGui::PopStyleColor();
 		ImGui::End();
 	}
 

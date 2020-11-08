@@ -12,6 +12,19 @@ void ScreenMainMenu::enable()
 
 void ScreenMainMenu::gui()
 {
+	if(ImGui::BeginMainMenuBar())
+	{
+		if (ImGui::BeginMenu("File"))
+		{
+			if(ImGui::MenuItem("New Window"));
+			{
+				
+			}
+			ImGui::EndMenu();
+		}
+		ImGui::EndMainMenuBar();
+	}
+
 	ImGui::Begin("Main Menu");
 	
 	Texture *banner = App->modResources->banner;
