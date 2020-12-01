@@ -1,4 +1,5 @@
 #include "ModuleNetworkingClient.h"
+#include "Timer.h"
 
 
 //////////////////////////////////////////////////////////////////////
@@ -133,6 +134,8 @@ void ModuleNetworkingClient::onPacketReceived(const InputMemoryStream &packet, c
 
 		// TODO(you): Reliability on top of UDP lab session
 	}
+	
+	lastPacketTime = Time.time;
 }
 
 void ModuleNetworkingClient::onUpdate()
@@ -205,6 +208,7 @@ void ModuleNetworkingClient::onUpdate()
 		}
 
 		// TODO(you): Latency management lab session
+		manageLatency(serverAddress);
 
 		// Update camera for player
 		GameObject *playerGameObject = App->modLinkingContext->getNetworkGameObject(networkId);
@@ -239,4 +243,20 @@ void ModuleNetworkingClient::onDisconnect()
 	}
 
 	App->modRender->cameraPosition = {};
+}
+
+void ModuleNetworkingClient::manageLatency(sockaddr_in address)
+{
+	if (Time.time - lastPacketTime > DISCONNECT_TIMEOUT_SECONDS)
+	{
+		disconnect();
+	}
+	if (Time.time - lastPingTime > PING_INTERVAL_SECONDS)
+	{
+		OutputMemoryStream pingPacket;
+		pingPacket << PROTOCOL_ID;
+		pingPacket << ClientMessage::Ping;
+		sendPacket(pingPacket, address);
+		lastPingTime = Time.time;
+	}
 }

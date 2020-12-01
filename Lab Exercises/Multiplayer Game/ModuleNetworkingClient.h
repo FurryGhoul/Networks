@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ModuleNetworking.h"
+#include "Timer.h"
 
 class ModuleNetworkingClient : public ModuleNetworking
 {
@@ -109,6 +110,9 @@ private:
 	//////////////////////////////////////////////////////////////////////
 
 	// TODO(you): Latency management lab session
+	float lastPacketTime;
+	float lastPingTime;
 
+	void manageLatency(sockaddr_in address);
 };
 

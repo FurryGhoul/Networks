@@ -36,6 +36,7 @@ void ModuleNetworkingServer::onStart()
 	}
 
 	state = ServerState::Listening;
+	sendPingTimer.Start();
 }
 
 void ModuleNetworkingServer::onGui()
@@ -188,6 +189,10 @@ void ModuleNetworkingServer::onPacketReceived(const InputMemoryStream &packet, c
 			}
 		}
 
+		else if (message == ClientMessage::Ping)
+		{
+			proxy->clientPing = Time.time;
+		}
 		// TODO(you): UDP virtual connection lab session
 	}
 }
@@ -215,6 +220,7 @@ void ModuleNetworkingServer::onUpdate()
 			if (clientProxy.connected)
 			{
 				// TODO(you): UDP virtual connection lab session
+				manageClientLatency(&clientProxy);
 
 				// Don't let the client proxy point to a destroyed game object
 				if (!IsValid(clientProxy.gameObject))
@@ -226,6 +232,7 @@ void ModuleNetworkingServer::onUpdate()
 
 				// TODO(you): Reliability on top of UDP lab session
 			}
+
 		}
 	}
 }
@@ -427,6 +434,24 @@ void ModuleNetworkingServer::destroyNetworkObject(GameObject * gameObject, float
 	netGameObjectsToDestroyWithDelay[emptyIndex].delaySeconds = delaySeconds;
 }
 
+void ModuleNetworkingServer::manageClientLatency(ClientProxy* client)
+{
+	if (Time.time - client->clientPing > DISCONNECT_TIMEOUT_SECONDS)
+	{
+		OutputMemoryStream disconnectPacket;
+		disconnectPacket << PROTOCOL_ID;
+		disconnectPacket << ServerMessage::Unwelcome;
+		sendPacket(disconnectPacket, client->address);
+	}
+	if (Time.time - timeSinceLastServerPing > PING_INTERVAL_SECONDS)
+	{
+		OutputMemoryStream pingPacket;
+		pingPacket << PROTOCOL_ID;
+		pingPacket << ServerMessage::Ping;
+		sendPacket(pingPacket, client->address);
+		timeSinceLastServerPing = Time.time;
+	}
+}
 
 //////////////////////////////////////////////////////////////////////
 // Global create / update / destruction of network game objects

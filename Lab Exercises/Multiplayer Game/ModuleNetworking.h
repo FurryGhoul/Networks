@@ -1,4 +1,5 @@
 #pragma once
+#include "Timer.h"
 
 class ModuleNetworking : public Module
 {
@@ -32,7 +33,7 @@ protected:
 
 	void reportError(const char *message);
 
-
+	Timer sendPingTimer; 
 
 private:
 

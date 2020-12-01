@@ -50,6 +50,8 @@ private:
 		std::string name;
 		GameObject *gameObject = nullptr;
 
+		float clientPing = 0;
+
 		// TODO(you): UDP virtual connection lab session
 		// TODO(you): World state replication lab session
 		// TODO(you): Reliability on top of UDP lab session
@@ -65,8 +67,6 @@ private:
 	ClientProxy * getClientProxy(const sockaddr_in &clientAddress);
 
     void destroyClientProxy(ClientProxy *clientProxy);
-
-
 
 public:
 
@@ -123,6 +123,10 @@ private:
 
 	// TODO(you): UDP virtual connection lab session
 
+	//Latency
+	void manageClientLatency(ClientProxy * client);
+
+	float timeSinceLastServerPing = 0; 
 };
 
 
