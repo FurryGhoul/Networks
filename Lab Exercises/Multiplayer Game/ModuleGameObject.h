@@ -38,6 +38,14 @@ struct GameObject
 	};
 	State state = NON_EXISTING;
 
+	vec2 initial_position = vec2{ 0.0f, 0.0f };
+	float initial_angle = 0.0f;
+
+	vec2 final_position = vec2{ 0.0f, 0.0f };
+	float final_angle = 0.0f;
+
+	float secondsElapsed = 0.0f;
+
 private:
 
 	void * operator new(size_t size) = delete;
