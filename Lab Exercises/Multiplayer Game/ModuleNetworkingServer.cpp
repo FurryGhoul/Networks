@@ -147,6 +147,10 @@ void ModuleNetworkingServer::onPacketReceived(const InputMemoryStream &packet, c
 					GameObject *gameObject = networkGameObjects[i];
 					
 					// TODO(you): World state replication lab session
+					if (gameObject != proxy->gameObject)
+					{
+						proxy->replicationServer.create(gameObject->networkId);
+					}
 				}
 
 				LOG("Message received: hello - from player %s", proxy->name.c_str());
@@ -184,6 +188,7 @@ void ModuleNetworkingServer::onPacketReceived(const InputMemoryStream &packet, c
 						unpackInputControllerButtons(inputData.buttonBits, proxy->gamepad);
 						proxy->gameObject->behaviour->onInput(proxy->gamepad);
 						proxy->nextExpectedInputSequenceNumber = inputData.sequenceNumber + 1;
+						proxy->lastExpectedInputSequenceNumber = inputData.sequenceNumber;
 					}
 				}
 			}
@@ -229,6 +234,7 @@ void ModuleNetworkingServer::onUpdate()
 				}
 
 				// TODO(you): World state replication lab session
+				manageClientReplication(&clientProxy);
 
 				// TODO(you): Reliability on top of UDP lab session
 			}
@@ -372,6 +378,7 @@ GameObject * ModuleNetworkingServer::instantiateNetworkObject()
 		if (clientProxies[i].connected)
 		{
 			// TODO(you): World state replication lab session
+			clientProxies[i].replicationServer.create(gameObject->networkId);
 		}
 	}
 
@@ -386,6 +393,7 @@ void ModuleNetworkingServer::updateNetworkObject(GameObject * gameObject)
 		if (clientProxies[i].connected)
 		{
 			// TODO(you): World state replication lab session
+			clientProxies[i].replicationServer.update(gameObject->networkId);
 		}
 	}
 }
@@ -398,6 +406,7 @@ void ModuleNetworkingServer::destroyNetworkObject(GameObject * gameObject)
 		if (clientProxies[i].connected)
 		{
 			// TODO(you): World state replication lab session
+			clientProxies[i].replicationServer.destroy(gameObject->networkId);
 		}
 	}
 
@@ -451,6 +460,17 @@ void ModuleNetworkingServer::manageClientLatency(ClientProxy* client)
 		sendPacket(pingPacket, client->address);
 		timeSinceLastServerPing = Time.time;
 	}
+}
+
+void ModuleNetworkingServer::manageClientReplication(ClientProxy* client)
+{
+	OutputMemoryStream replicationPacket;
+	replicationPacket << PROTOCOL_ID;
+	replicationPacket << ServerMessage::Replication;
+	replicationPacket << client->lastExpectedInputSequenceNumber;
+
+	client->replicationServer.write(replicationPacket);
+	sendPacket(replicationPacket, client->address);
 }
 
 //////////////////////////////////////////////////////////////////////

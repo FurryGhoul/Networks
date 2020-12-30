@@ -54,9 +54,11 @@ private:
 
 		// TODO(you): UDP virtual connection lab session
 		// TODO(you): World state replication lab session
+		ReplicationManagerServer replicationServer;
 		// TODO(you): Reliability on top of UDP lab session
 
 		uint32 nextExpectedInputSequenceNumber = 0;
+		uint32 lastExpectedInputSequenceNumber = 0;
 		InputController gamepad;
 	};
 
@@ -119,12 +121,13 @@ private:
 
 	uint16 listenPort = 0;
 
-
+	//Replication
+	void manageClientReplication(ClientProxy* client);
 
 	// TODO(you): UDP virtual connection lab session
 
 	//Latency
-	void manageClientLatency(ClientProxy * client);
+	void manageClientLatency(ClientProxy* client);
 
 	float timeSinceLastServerPing = 0; 
 };
