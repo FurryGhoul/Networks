@@ -63,6 +63,7 @@ private:
 	uint32 networkId = 0;
 
 
+
 	// Connecting stage
 
 	float secondsSinceLastHello = 0.0f;
@@ -78,7 +79,6 @@ private:
 
 	float inputDeliveryIntervalSeconds = 0.05f;
 	float secondsSinceLastInputDelivery = 0.0f;
-
 
 
 	//////////////////////////////////////////////////////////////////////

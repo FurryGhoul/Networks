@@ -52,6 +52,7 @@ void ModuleNetworkingClient::onStart()
 
 	secondsSinceLastHello = 9999.0f;
 	secondsSinceLastInputDelivery = 0.0f;
+	inputDeliveryIntervalSeconds = Time.time;
 }
 
 void ModuleNetworkingClient::onGui()
