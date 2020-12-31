@@ -56,6 +56,7 @@ private:
 		// TODO(you): World state replication lab session
 		ReplicationManagerServer replicationServer;
 		// TODO(you): Reliability on top of UDP lab session
+		DeliveryManager deliveryManager;
 
 		uint32 nextExpectedInputSequenceNumber = 0;
 		uint32 lastExpectedInputSequenceNumber = 0;

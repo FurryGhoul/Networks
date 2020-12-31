@@ -18,7 +18,7 @@ void ReplicationManagerServer::update(uint32 networkID)
 	commands.push_back(ReplicationCommand(networkID, ReplicationAction::UPDATE));
 }
 
-void ReplicationManagerServer::write(OutputMemoryStream& packet)
+void ReplicationManagerServer::write(OutputMemoryStream& packet, Delivery* delivery)
 {
 	for (auto item = commands.begin(); item != commands.end(); ++item)
 	{

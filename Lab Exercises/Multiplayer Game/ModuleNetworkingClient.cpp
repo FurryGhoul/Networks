@@ -132,17 +132,20 @@ void ModuleNetworkingClient::onPacketReceived(const InputMemoryStream &packet, c
 	else if (state == ClientState::Connected)
 	{
 		// TODO(you): World state replication lab session
+		// TODO(you): Reliability on top of UDP lab session
+
 		if (message == ServerMessage::Replication)
 		{
 			uint32 lastInput = 0;
 			packet >> lastInput;
 
-			replicationClient.read(packet);
+			if (deliveryManager.processSequenceNumber(packet))
+			{
+				replicationClient.read(packet);
+			}
 
 			inputDataFront = lastInput;
 		}
-
-		// TODO(you): Reliability on top of UDP lab session
 	}
 	
 	lastPacketTime = Time.time;
@@ -212,7 +215,7 @@ void ModuleNetworkingClient::onUpdate()
 			}
 
 			// Clear the queue
-			inputDataFront = inputDataBack;
+			//inputDataFront = inputDataBack;
 
 			sendPacket(packet, serverAddress);
 		}

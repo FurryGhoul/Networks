@@ -6,11 +6,11 @@ Delivery* DeliveryManager::writeSequenceNumber(OutputMemoryStream& packet)
 {
 	Delivery* delivery = new Delivery();
 
-	packet << nextSequenceNumber;
-	delivery->sequenceNumber = nextSequenceNumber;
+	packet << nextOutgoingSequenceNumber;
+	delivery->sequenceNumber = nextOutgoingSequenceNumber;
 	delivery->dispatchTime = Time.time;
 
-	nextSequenceNumber++;
+	nextOutgoingSequenceNumber++;
 	pendingDeliveries.push_back(delivery);
 
 	return delivery;
@@ -119,4 +119,28 @@ void DeliveryManager::clear()
 
 	nextOutgoingSequenceNumber = 0;
 	nextExpectedSequenceNumber = 0;
+}
+
+void ReplicationDeliveryDelegate::onDeliverySuccess(DeliveryManager* deliveryManager)
+{
+
+}
+
+void ReplicationDeliveryDelegate::onDeliveryFailure(DeliveryManager* deliveryManager)
+{
+	for (auto item = deliveryReplicationCommands.begin(); item != deliveryReplicationCommands.end(); ++item)
+	{
+		if ((*item) == ReplicationAction::CREATE)
+		{
+			replicationServer->create((*item));
+		}
+		if ((*item) == ReplicationAction::UPDATE)
+		{
+			replicationServer->update((*item));
+		}
+		if ((*item) == ReplicationAction::DESTROY)
+		{
+			replicationServer->destroy((*item));
+		}
+	}
 }

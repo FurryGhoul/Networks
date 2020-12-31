@@ -196,6 +196,11 @@ void ModuleNetworkingServer::onPacketReceived(const InputMemoryStream &packet, c
 
 		else if (message == ClientMessage::Ping)
 		{
+			proxy->deliveryManager.processAckdSequenceNumbers(packet);
+		}
+
+		if (proxy != nullptr)
+		{
 			proxy->clientPing = Time.time;
 		}
 		// TODO(you): UDP virtual connection lab session
@@ -469,7 +474,12 @@ void ModuleNetworkingServer::manageClientReplication(ClientProxy* client)
 	replicationPacket << ServerMessage::Replication;
 	replicationPacket << client->lastExpectedInputSequenceNumber;
 
-	client->replicationServer.write(replicationPacket);
+	Delivery* delivery = nullptr;
+	delivery = client->deliveryManager.writeSequenceNumber(replicationPacket);
+	client->replicationServer.write(replicationPacket, delivery);
+
+	delivery->delegate = new ReplicationDeliveryDelegate();
+
 	sendPacket(replicationPacket, client->address);
 }
 

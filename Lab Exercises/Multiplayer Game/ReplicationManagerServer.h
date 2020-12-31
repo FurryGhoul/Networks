@@ -12,7 +12,7 @@ public:
 	void update(uint32 networkID);
 
 
-	void write(OutputMemoryStream& packet);
+	void write(OutputMemoryStream& packet, Delivery* delivery);
 
 	std::vector<ReplicationCommand> commands;
 };

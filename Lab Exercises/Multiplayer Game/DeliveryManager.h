@@ -1,15 +1,25 @@
 #pragma once
 
 // TODO(you): Reliability on top of UDP lab session
+#include "ReplicationCommand.h"
+
+#include <vector>
 #include <list>
+#include <map>
 
 class DeliveryManager;
+class ReplicationManagerServer;
 
 class DeliveryDelegate
 {
 public:
 	virtual void onDeliverySuccess(DeliveryManager* deliveryManager) = 0;
 	virtual void onDeliveryFailure(DeliveryManager* deliveryManager) = 0;
+
+public:
+	std::vector<ReplicationAction> deliveryReplicationCommands;
+	ReplicationManagerServer* replicationServer = nullptr;
+	bool repeated = false;
 };
 
 struct Delivery
@@ -48,4 +58,11 @@ private:
 
 	uint32 nextExpectedSequenceNumber = 0;
 	std::list<uint32> pendingNumsACK;
+};
+
+class ReplicationDeliveryDelegate : public DeliveryDelegate
+{
+	void onDeliverySuccess(DeliveryManager* deliveryManager);
+
+	void onDeliveryFailure(DeliveryManager* deliveryManager);
 };
