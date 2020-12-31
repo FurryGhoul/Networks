@@ -26,6 +26,10 @@ struct GameObject
 	uint32 networkId = 0;                    // NOTE(jesus): Only for network game objects
 	bool networkInterpolationEnabled = true; // NOTE(jesus): Only for network game objects
 
+	//Score
+	uint32 score = 0;
+	uint32 kills = 0;
+
 	// NOTE(jesus): Don't use in gameplay systems (use Instantiate, Destroy instead)
 	enum State {
 		NON_EXISTING,

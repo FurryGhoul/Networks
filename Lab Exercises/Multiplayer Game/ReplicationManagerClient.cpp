@@ -88,6 +88,7 @@ void ReplicationManagerClient::read(const InputMemoryStream& packet)
 				Spaceship* playerBehaviour = App->modBehaviour->addSpaceship(object);
 				object->behaviour = playerBehaviour;
 				object->behaviour->isServer = false;
+				App->modUI->clientShip = object;
 			}
 			if (auxCollider == ColliderType::Laser)
 			{
@@ -95,6 +96,8 @@ void ReplicationManagerClient::read(const InputMemoryStream& packet)
 				object->behaviour = laserBehaviour;
 				object->behaviour->isServer = false;
 			}
+
+			
 		}
 		if (action == ReplicationAction::UPDATE)
 		{
