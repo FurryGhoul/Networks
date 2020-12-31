@@ -116,6 +116,7 @@ void Spaceship::onCollisionTriggered(Collider &c1, Collider &c2)
 		
 			if (hitPoints > 0)
 			{
+				c2.gameObject->score += 20;
 				hitPoints--;
 				NetworkUpdate(gameObject);
 			}
@@ -125,6 +126,9 @@ void Spaceship::onCollisionTriggered(Collider &c1, Collider &c2)
 
 			if (hitPoints <= 0)
 			{
+				c2.gameObject->score += 200;
+				c2.gameObject->kills++;
+
 				// Centered big explosion
 				size = 250.0f + 100.0f * Random.next();
 				position = gameObject->position;
