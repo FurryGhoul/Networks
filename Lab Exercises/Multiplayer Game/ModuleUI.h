@@ -24,6 +24,4 @@ public:
 	LRESULT HandleWindowsEvents(UINT msg, WPARAM wParam, LPARAM lParam);
 
 	bool inputsEnabled = true;
-
-	GameObject* clientShip;
 };
