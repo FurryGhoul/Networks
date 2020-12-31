@@ -78,6 +78,7 @@ void Spaceship::onInput(const InputController &input)
 			laser->position = gameObject->position;
 			laser->angle = gameObject->angle;
 			laser->size = { 20, 60 };
+			laser->callback = gameObject;
 
 			laser->sprite = App->modRender->addSprite(laser);
 			laser->sprite->order = 3;
@@ -116,7 +117,7 @@ void Spaceship::onCollisionTriggered(Collider &c1, Collider &c2)
 		
 			if (hitPoints > 0)
 			{
-				c2.gameObject->score += 20;
+				gameObject->score += 20;
 				hitPoints--;
 				NetworkUpdate(gameObject);
 			}
@@ -126,8 +127,8 @@ void Spaceship::onCollisionTriggered(Collider &c1, Collider &c2)
 
 			if (hitPoints <= 0)
 			{
-				c2.gameObject->score += 200;
-				c2.gameObject->kills++;
+				gameObject->score += 200;
+				gameObject->kills++;
 
 				// Centered big explosion
 				size = 250.0f + 100.0f * Random.next();

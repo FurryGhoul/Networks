@@ -27,6 +27,7 @@ struct GameObject
 	bool networkInterpolationEnabled = true; // NOTE(jesus): Only for network game objects
 
 	//Score
+	GameObject* callback = nullptr;
 	uint32 score = 0;
 	uint32 kills = 0;
 

@@ -90,6 +90,15 @@ void ModuleNetworkingClient::onGui()
 
 			ImGui::Separator();
 
+			if (playerGameObject != nullptr)
+			{
+				ImGui::Text("Score:");
+				ImGui::Text("TOTAL SCORE: %i", playerGameObject->score);
+				ImGui::Text("KILLS: %i", playerGameObject->kills);
+			}
+
+			ImGui::Separator();
+
 			ImGui::Text("Connection checking info:");
 			ImGui::Text(" - Ping interval (s): %f", PING_INTERVAL_SECONDS);
 			ImGui::Text(" - Disconnection timeout (s): %f", DISCONNECT_TIMEOUT_SECONDS);

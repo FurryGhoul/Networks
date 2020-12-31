@@ -89,11 +89,6 @@ bool ModuleUI::gui()
 			ImGui::PopStyleColor();
 			ImGui::EndTabItem();
 		}
-		if (ImGui::BeginTabItem("Score"))
-		{
-			ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.8f, 0.8f, 0.8f, 1.0f));
-			ImGui::Text("TOTAL SCORE: %i", clientShip->score);
-		}
 
 		ImGui::EndTabBar();
 	}
